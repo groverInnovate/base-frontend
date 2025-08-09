@@ -30,8 +30,8 @@ export default function TransactionApp({
       let address = initialAddress;
       let amountValue = initialAmount;
 
-      // If no props provided, fallback to URL parsing (for direct links)
-      if (!address && !amountValue) {
+      // FIXED: Add window check to prevent SSR issues
+      if (!address && !amountValue && typeof window !== 'undefined') {
         const urlParams = new URLSearchParams(window.location.search);
         address = urlParams.get('address') || '';
         amountValue = urlParams.get('amount') || '';
@@ -46,8 +46,11 @@ export default function TransactionApp({
         }
         setReceiverAddress(address);
         console.log('Receiver address set:', address);
-      } else {
+      } else if (mode === 'nfc' || mode === 'contact') {
+        // FIXED: Only set error for NFC/contact modes that require an address
         setError('No receiver address provided');
+        setIsLoading(false);
+        return;
       }
 
       // Set initial amount if provided
@@ -68,10 +71,17 @@ export default function TransactionApp({
     if (!isFrameReady) {
       setFrameReady();
     }
-    
-    // Parse transaction data when component mounts
-    parseTransactionData();
-  }, [isFrameReady, setFrameReady, parseTransactionData]);
+  }, [isFrameReady, setFrameReady]);
+
+  // FIXED: Separate useEffect for parsing to avoid SSR issues
+  useEffect(() => {
+    // Only parse after component has mounted (client-side)
+    const timer = setTimeout(() => {
+      parseTransactionData();
+    }, 100); // Small delay to ensure hydration is complete
+
+    return () => clearTimeout(timer);
+  }, [parseTransactionData]);
 
   const getHeaderInfo = () => {
     switch (mode) {
@@ -79,7 +89,7 @@ export default function TransactionApp({
         return {
           icon: <User className="w-6 h-6 text-blue-600" />,
           title: contactName ? `Pay ${contactName}` : 'Pay Contact',
-          subtitle: 'From your Google contacts',
+          subtitle: 'From your contacts',
           bgColor: 'bg-blue-100'
         };
       case 'nfc':
