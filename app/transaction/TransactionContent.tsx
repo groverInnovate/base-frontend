@@ -4,26 +4,36 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import TransactionApp from '../components/TransactionApp';
 
+type Mode = 'contact' | 'nfc' | 'manual';
+
+interface TransactionData {
+  address: string;
+  amount: string;
+  contactName: string;
+  mode: Mode;
+}
+
 export default function TransactionContent() {
   const searchParams = useSearchParams();
-  const [transactionData, setTransactionData] = useState({
+  const [transactionData, setTransactionData] = useState<TransactionData>({
     address: '',
     amount: '',
     contactName: '',
-    mode: 'nfc' as const
+    mode: 'manual'
   });
 
   useEffect(() => {
     const address = searchParams.get('address') || '';
     const amount = searchParams.get('amount') || '';
     const contactName = searchParams.get('name') || '';
-    const token = searchParams.get('token') || 'USDC';
+    const modeParam = (searchParams.get('mode') || 'manual').toLowerCase();
+    const mode: Mode = (modeParam === 'nfc' || modeParam === 'contact') ? (modeParam as Mode) : 'manual';
 
     setTransactionData({
       address,
       amount,
       contactName,
-      mode: 'nfc'
+      mode,
     });
   }, [searchParams]);
 

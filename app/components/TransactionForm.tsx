@@ -35,14 +35,14 @@ export default function TransactionForm({
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  // Create transaction calls array with proper typing
-  const emptyData: `0x${string}` = '0x';
-
-  const calls = [{
-    to: receiverAddress as `0x${string}`,
-    value: amount ? parseEther(amount) : BigInt(0),
-     emptyData,
-  }];
+  // Create transaction calls array with proper typing, only when valid
+  const calls = receiverAddress
+    ? [{
+        to: receiverAddress as `0x${string}`,
+        value: amount ? parseEther(amount) : BigInt(0),
+        data: '0x' as `0x${string}`,
+      }]
+    : [];
 
   const handleOnSuccess = (response: any) => {
     console.log('Transaction successful:', response);
@@ -182,7 +182,7 @@ export default function TransactionForm({
       >
         <TransactionButton
           text={`Send Transaction ${isButtonDisabled ? '(Disabled)' : ''}`}
-          disabled={isButtonDisabled}
+          disabled={isButtonDisabled || calls.length === 0}
           className={`w-full p-4 rounded-lg font-semibold ${
             isButtonDisabled 
               ? 'bg-gray-400 cursor-not-allowed text-gray-600' 
