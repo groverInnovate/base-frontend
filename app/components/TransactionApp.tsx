@@ -2,14 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
-import { OnchainKitProvider } from '@coinbase/onchainkit';
 import TransactionForm from './TransactionForm';
 import LoadingSpinner from './LoadingSpinner';
 import { Smartphone, Nfc, CreditCard } from 'lucide-react';
-import { base } from 'viem/chains';
-
-// ... rest of your TransactionApp component remains the same
-
 
 export default function TransactionApp() {
   const { isFrameReady, context, setFrameReady } = useMiniKit();
@@ -22,7 +17,8 @@ export default function TransactionApp() {
       // Parse URL parameters for NFC data
       const urlParams = new URLSearchParams(window.location.search);
       const address = urlParams.get('address');
-      const amount = urlParams.get('amount'); // Optional pre-filled amount
+      
+      console.log('Parsed address from URL:', address); // Debug log
       
       if (address) {
         // Validate Ethereum address format
@@ -30,6 +26,7 @@ export default function TransactionApp() {
           throw new Error('Invalid wallet address format');
         }
         setReceiverAddress(address);
+        console.log('Receiver address set:', address); // Debug log
       } else {
         setError('No receiver address found in NFC data');
       }
@@ -51,6 +48,7 @@ export default function TransactionApp() {
     parseNFCData();
   }, [isFrameReady, setFrameReady, parseNFCData]);
 
+  // Rest of your component remains the same...
   if (isLoading) {
     return (
       <div className="card">

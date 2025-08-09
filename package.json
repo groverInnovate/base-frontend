@@ -12,11 +12,14 @@
     "@coinbase/onchainkit": "latest",
     "@farcaster/core": "latest",
     "@farcaster/miniapp-sdk": "latest",
+    "@rainbow-me/rainbowkit": "^2.2.8",
+    "@tanstack/react-query": "^5.84.2",
     "lucide-react": "latest",
     "next": "15.4.6",
     "react": "^18",
     "react-dom": "^18",
-    "viem": "latest"
+    "viem": "latest",
+    "wagmi": "^2.16.2"
   },
   "devDependencies": {
     "@types/node": "^20",

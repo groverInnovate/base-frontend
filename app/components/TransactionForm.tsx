@@ -2,6 +2,9 @@
 
 import { useState, useCallback } from 'react';
 import { Transaction, TransactionButton, TransactionStatus } from '@coinbase/onchainkit/transaction';
+import { Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
+import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
+import { color } from '@coinbase/onchainkit/theme';
 import { parseEther } from 'viem';
 import { Shield, Send, Loader2 } from 'lucide-react';
 
@@ -19,11 +22,12 @@ export default function TransactionForm({ receiverAddress }: TransactionFormProp
 
   // Create transaction calls array with proper typing
   const emptyData: `0x${string}` = '0x';
+
   const calls = [{
-  to: receiverAddress as `0x${string}`,
-  value: amount ? parseEther(amount) : BigInt(0),
-   emptyData,
-}];
+    to: receiverAddress as `0x${string}`,
+    value: amount ? parseEther(amount) : BigInt(0),
+     emptyData,
+  }];
 
   const handleOnSuccess = (response: any) => {
     console.log('Transaction successful:', response);
@@ -41,8 +45,42 @@ export default function TransactionForm({ receiverAddress }: TransactionFormProp
     console.error('Transaction failed:', error);
   };
 
+  // Debug variables
+  const isReceiverValid = !!receiverAddress;
+  const isAmountValid = !!amount;
+  const isAmountPositive = parseFloat(amount) > 0;
+  const isButtonDisabled = !receiverAddress || !amount || parseFloat(amount) <= 0;
+
   return (
     <div className="space-y-6">
+      {/* Wallet Connection Section */}
+      <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+        <h3 className="text-sm font-medium text-gray-700 mb-3">Wallet Connection</h3>
+        <Wallet>
+          <WalletDropdown>
+            <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+              <Avatar />
+              <Name />
+              <Address className={color.foregroundMuted} />
+              <EthBalance />
+            </Identity>
+            <WalletDropdownLink icon="wallet" href="https://keys.coinbase.com">
+              Wallet
+            </WalletDropdownLink>
+            <WalletDropdownDisconnect />
+          </WalletDropdown>
+        </Wallet>
+      </div>
+
+      {/* Debug Information */}
+      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <p className="text-yellow-700 text-sm font-medium mb-1">Debug Info</p>
+        <p className="text-yellow-600 text-xs">Receiver Address: {receiverAddress ? '✅ Valid' : '❌ Missing'}</p>
+        <p className="text-yellow-600 text-xs">Amount: {amount ? '✅ Valid' : '❌ Missing'}</p>
+        <p className="text-yellow-600 text-xs">Amount &gt; 0: {parseFloat(amount) > 0 ? '✅ Yes' : '❌ No'}</p>
+        <p className="text-yellow-600 text-xs">Button Disabled: {isButtonDisabled ? '❌ Yes' : '✅ No'}</p>
+      </div>
+
       {/* Receiver Address */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -52,6 +90,9 @@ export default function TransactionForm({ receiverAddress }: TransactionFormProp
         <div className="input read-only" title={receiverAddress}>
           {formatAddress(receiverAddress)}
         </div>
+        <p className="text-xs text-gray-500 mt-1">
+          Full address: {receiverAddress}
+        </p>
       </div>
 
       {/* Amount Input */}
@@ -62,14 +103,17 @@ export default function TransactionForm({ receiverAddress }: TransactionFormProp
         <input
           type="number"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={(e) => {
+            console.log('Amount changed:', e.target.value);
+            setAmount(e.target.value);
+          }}
           placeholder="0.001"
           step="0.001"
           min="0"
           className="input"
         />
         <p className="text-xs text-gray-500 mt-1">
-          Minimum: 0.001 ETH • Network: Base
+          Minimum: 0.001 ETH • Network: Base Sepolia Testnet
         </p>
       </div>
 
@@ -80,8 +124,16 @@ export default function TransactionForm({ receiverAddress }: TransactionFormProp
             ✅ Transaction successful! Payment sent to {formatAddress(receiverAddress)}
           </p>
           <p className="text-xs text-gray-600 mt-1 break-all">
-            TX: {transactionHash}
+            TX Hash: {transactionHash}
           </p>
+          <a 
+            href={`https://sepolia.basescan.org/tx/${transactionHash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 text-xs underline hover:text-blue-800"
+          >
+            View on BaseScan →
+          </a>
         </div>
       )}
 
@@ -92,16 +144,27 @@ export default function TransactionForm({ receiverAddress }: TransactionFormProp
         onError={handleOnError}
       >
         <TransactionButton
-          text="Pay with Face ID"
-          disabled={!receiverAddress || !amount || parseFloat(amount) <= 0}
-          className="button button-primary flex items-center justify-center"
+          text={`Send Transaction ${isButtonDisabled ? '(Disabled)' : ''}`}
+          disabled={isButtonDisabled}
+          className={`button flex items-center justify-center w-full p-4 rounded-lg font-semibold ${
+            isButtonDisabled 
+              ? 'bg-gray-400 cursor-not-allowed text-gray-600' 
+              : 'bg-blue-600 hover:bg-blue-700 text-white'
+          }`}
         />
         <TransactionStatus />
       </Transaction>
 
-      <p className="text-xs text-gray-500 text-center">
-        🔒 Your payment will be secured with Face ID authentication
-      </p>
+      {/* Testing Instructions */}
+      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <p className="text-blue-700 text-sm font-medium mb-1">Testing Instructions</p>
+        <ol className="text-blue-600 text-xs space-y-1 list-decimal list-inside">
+          <li>Connect your wallet using the wallet section above</li>
+          <li>Make sure you're on Base Sepolia testnet</li>
+          <li>Get testnet ETH from <a href="https://bridge.base.org/deposit" target="_blank" className="underline">Base faucet</a></li>
+          <li>Enter an amount and click "Send Transaction"</li>
+        </ol>
+      </div>
     </div>
   );
 }
