@@ -102,10 +102,10 @@ export default function TransactionForm({
       {/* Debug Information */}
       <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
         <p className="text-yellow-700 text-sm font-medium mb-1">Debug Info</p>
-        <p className="text-yellow-600 text-xs">Receiver Address: {receiverAddress ? '✅ Valid' : '❌ Missing'}</p>
-        <p className="text-yellow-600 text-xs">Amount: {amount ? '✅ Valid' : '❌ Missing'}</p>
-        <p className="text-yellow-600 text-xs">Amount &gt; 0: {parseFloat(amount) > 0 ? '✅ Yes' : '❌ No'}</p>
-        <p className="text-yellow-600 text-xs">Button Disabled: {isButtonDisabled ? '❌ Yes' : '✅ No'}</p>
+        <p className="text-yellow-600 text-xs">Receiver Address: {receiverAddress ? 'Valid' : 'Missing'}</p>
+        <p className="text-yellow-600 text-xs">Amount: {amount ? 'Valid' : 'Missing'}</p>
+        <p className="text-yellow-600 text-xs">Amount &gt; 0: {parseFloat(amount) > 0 ? 'Yes' : 'No'}</p>
+        <p className="text-yellow-600 text-xs">Button Disabled: {isButtonDisabled ? 'Yes' : 'No'}</p>
         {/* ✅ Add mode and contact info to debug */}
         <p className="text-yellow-600 text-xs">Mode: {mode}</p>
         {contactName && <p className="text-yellow-600 text-xs">Contact: {contactName}</p>}
@@ -200,7 +200,7 @@ export default function TransactionForm({
         </p>
         <ol className="text-blue-600 text-xs space-y-1 list-decimal list-inside">
           <li>Connect your wallet using the wallet section above</li>
-          <li>Make sure you're on Base Sepolia testnet</li>
+          <li>Make sure you are on Base Sepolia testnet</li>
           <li>Get testnet ETH from <a href="https://bridge.base.org/deposit" target="_blank" className="underline">Base faucet</a></li>
           <li>{amount ? 'Click "Send Transaction" to proceed' : 'Enter an amount and click "Send Transaction"'}</li>
         </ol>
