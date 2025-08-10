@@ -3,6 +3,8 @@ import "@coinbase/onchainkit/styles.css";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
+import sdk from "@farcaster/miniapp-sdk";
+import React, { useEffect } from 'react';
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -40,6 +42,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+	useEffect(() => {
+		const initializeApp = async () => {
+			await sdk.actions.ready()
+		}
+
+		initializeApp()
+	}, [])
+
   return (
     <html lang="en">
       <body className="bg-background">
