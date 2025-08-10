@@ -1,17 +1,15 @@
+import sdk from "@farcaster/miniapp-sdk";
 import {
   MiniAppNotificationDetails,
   type SendNotificationRequest,
   sendNotificationResponseSchema,
-} from "@farcaster/frame-sdk";
+} from "@farcaster/miniapp-sdk";
 import { getUserNotificationDetails } from "@/lib/notification";
 
 const appUrl = process.env.NEXT_PUBLIC_URL || "";
 
 type SendFrameNotificationResult =
-  | {
-      state: "error";
-      error: unknown;
-    }
+  | { state: "error"; error: unknown }
   | { state: "no_token" }
   | { state: "rate_limit" }
   | { state: "success" };
@@ -27,9 +25,13 @@ export async function sendFrameNotification({
   body: string;
   notificationDetails?: MiniAppNotificationDetails | null;
 }): Promise<SendFrameNotificationResult> {
+  // Try to use provided notification details
   if (!notificationDetails) {
-    notificationDetails = await getUserNotificationDetails(fid);
+    // Fallback: Get from SDK context if available
+    const ctx = sdk.context.client;
+    notificationDetails = ctx.notificationDetails ?? (await getUserNotificationDetails(fid));
   }
+
   if (!notificationDetails) {
     return { state: "no_token" };
   }
@@ -51,12 +53,12 @@ export async function sendFrameNotification({
   const responseJson = await response.json();
 
   if (response.status === 200) {
-    const responseBody = sendNotificationResponseSchema.safeParse(responseJson);
-    if (responseBody.success === false) {
-      return { state: "error", error: responseBody.error.errors };
+    const parsed = sendNotificationResponseSchema.safeParse(responseJson);
+    if (parsed.success === false) {
+      return { state: "error", error: parsed.error.errors };
     }
 
-    if (responseBody.data.result.rateLimitedTokens.length) {
+    if (parsed.data.result.rateLimitedTokens.length > 0) {
       return { state: "rate_limit" };
     }
 
@@ -65,3 +67,4 @@ export async function sendFrameNotification({
 
   return { state: "error", error: responseJson };
 }
+
