@@ -1,6 +1,10 @@
 import sdk from "@farcaster/miniapp-sdk";
+import {
+  MiniAppNotificationDetails,
+  type SendNotificationRequest,
+  sendNotificationResponseSchema,
+} from "@farcaster/miniapp-sdk";
 import { getUserNotificationDetails } from "@/lib/notification";
-import { type SendNotificationRequest, sendNotificationResponseSchema } from "@farcaster/miniapp-sdk";
 
 const appUrl = process.env.NEXT_PUBLIC_URL || "";
 
@@ -19,13 +23,12 @@ export async function sendFrameNotification({
   fid: number;
   title: string;
   body: string;
-  notificationDetails?: { url: string; token: string } | null;
+  notificationDetails?: MiniAppNotificationDetails | null;
 }): Promise<SendFrameNotificationResult> {
-  // Try to use passed-in details first
   if (!notificationDetails) {
-    // Fallback: pull from sdk context if available
-    const ctx = sdk.context.client;
-    notificationDetails = ctx.notificationDetails ?? (await getUserNotificationDetails(fid));
+    // Await the async sdk.context call
+    const ctx = await sdk.context();
+    notificationDetails = ctx.client?.notificationDetails ?? (await getUserNotificationDetails(fid));
   }
 
   if (!notificationDetails) {
@@ -50,7 +53,7 @@ export async function sendFrameNotification({
 
   if (response.status === 200) {
     const parsed = sendNotificationResponseSchema.safeParse(responseJson);
-    if (parsed.success === false) {
+    if (!parsed.success) {
       return { state: "error", error: parsed.error.errors };
     }
 
