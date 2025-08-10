@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import './theme.css'
 import { Providers } from './providers'
+import sdk from '@farcaster/miniapp-sdk';
 
 export const metadata:  Metadata = {
   title: 'NFC Payment Mini App',
@@ -18,6 +19,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+	useEffect(() => {
+    sdk.actions.ready();
+  }, []);
   return (
     <html lang="en">
       <head>
