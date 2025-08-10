@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Users, Nfc, CreditCard, TrendingUp, Award, Info } from 'lucide-react';
 import ScoreCard from '../components/ScoreCard';
 import HowToUse from '../components/HowToUse';
+import { signInAndGetContacts } from "@/lib/firebase";
 
 export default function HomePage() {
   const router = useRouter();
@@ -43,9 +44,16 @@ export default function HomePage() {
           <div className="grid grid-cols-2 gap-4">
             {/* Pay Contacts */}
             <button
-              onClick={() => router.push('/contacts')}
-              className="bg-blue-50 hover:bg-blue-100 p-4 rounded-xl transition-colors"
-            >
+              onClick={async () => {
+		      try{
+			      const contacts = await signInAndGetContacts();
+			      console.log("Fetched Contacts:", contacts);
+			      router.push('/contacts');
+		      } catch (err) {
+			      console.error("Error fetching contacts:", err);
+		      }
+	      }}
+	      className="bg-blue-50 hover:bg-blue-100 p-4 rounded-xl transition-colors">
               <Users className="w-8 h-8 text-blue-600 mb-2" />
               <p className="text-sm font-semibold text-gray-900">Pay Contacts</p>
               <p className="text-xs text-gray-600">From Google Contacts</p>
